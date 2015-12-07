@@ -5,4 +5,4 @@ Docker image for automatic daily backups postgresql server (based on https://wik
 
 ### Running ###
 
-```docker run -d --restart=always --name pgbackup -e PGHOST=192.168.1.1 -e PGUSER=postgres -e PGPASSWORD=somesecret pgbackup```
+```docker run -d --restart=always --volume /path/to/backups:/backups --name pgbackup -e PGHOST=192.168.1.1 -e PGUSER=postgres -e PGPASSWORD=somesecret unknownlighter/pgbackup```
