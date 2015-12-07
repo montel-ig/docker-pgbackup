@@ -1,0 +1,1 @@
+20 * * * * root /cron_task.sh /pg_backup/pg_backup_rotated.sh
