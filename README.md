@@ -4,8 +4,9 @@ Docker image for automatic daily backups postgresql server (based on https://wik
 
 Forked from https://bitbucket.org/lighter/docker-pgbackup/ in order to support multiple database versions. Originally by Oleg Dementiev.
 
+See https://hub.docker.com/r/sarkkine/pgbackup/
 ### Running ###
 
 ```console
-$ docker run -d --restart=always --volume /path/to/backups:/backups --name pgbackup -e PGHOST=192.168.1.1 -e PGUSER=postgres -e PGPASSWORD=somesecret unknownlighter/pgbackup
+$ docker run -d --restart=always --volume /path/to/backups:/backups --name pgbackup -e PGHOST=192.168.1.1 -e PGUSER=postgres -e PGPASSWORD=somesecret sarkkine/pgbackup
 ```
