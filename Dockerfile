@@ -1,5 +1,5 @@
-FROM postgres:9.4
-MAINTAINER unknownlighter@gmail.com
+FROM postgres:9.5
+MAINTAINER Jussi Sarkkinen <jussi@sarkkinen.net>
 
 COPY pg_backup /pg_backup
 
