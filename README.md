@@ -1,7 +1,8 @@
 # README #
 
-Docker image for automatic daily backups postgresql server (based on https://wiki.postgresql.org/wiki/Automated_Backup_on_Linux)
+Docker image for automatic daily backups postgresql server (based on https://wiki.postgresql.org/wiki/Automated_Backup_on_Linux).
 
+Forked from https://bitbucket.org/lighter/docker-pgbackup/ in order to support multiple database versions. Originally by Oleg Dementiev.
 
 ### Running ###
 
