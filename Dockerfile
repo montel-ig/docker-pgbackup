@@ -1,4 +1,4 @@
-FROM postgres:9.5
+FROM postgres:9.6
 MAINTAINER Jussi Sarkkinen <jussi@sarkkinen.net>
 
 COPY pg_backup /pg_backup
