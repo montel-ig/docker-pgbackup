@@ -5,28 +5,34 @@
 ###########################
  
 while [ $# -gt 0 ]; do
-        case $1 in
-                -c)
-                        if [ -r "$2" ]; then
-                                source "$2"
-                                shift 2
-                        else
-                                ${ECHO} "Unreadable config file \"$2\"" 1>&2
-                                exit 1
-                        fi
-                        ;;
-                *)
-                        ${ECHO} "Unknown Option \"$1\"" 1>&2
-                        exit 2
-                        ;;
-        esac
+    case $1 in
+            -c)
+                if [ -r "$2" ]; then
+                        source "$2"
+                        shift 2
+                else
+                        ${ECHO} "Unreadable config file \"$2\"" 1>&2
+                        exit 1
+                fi
+                ;;
+            *)
+                ${ECHO} "Unknown Option \"$1\"" 1>&2
+                exit 2
+                ;;
+    esac
 done
  
 if [ $# = 0 ]; then
         SCRIPTPATH=$(cd ${0%/*} && pwd -P)
         source $SCRIPTPATH/pg_backup.config
 fi;
- 
+
+EXTRA_OPTS=""
+if [ $ENABLE_CLEAN_OPT = "yes" ]; then
+    EXTRA_OPTS="--clean --if-exists"
+fi
+
+
 ###########################
 #### PRE-BACKUP CHECKS ####
 ###########################
@@ -116,10 +122,15 @@ do
 	then
 		echo "Plain backup of $DATABASE"
  
-		if ! pg_dump -Fp -h "$HOSTNAME" -U "$USERNAME" "$DATABASE" | gzip > $FINAL_BACKUP_DIR"$DATABASE".sql.gz.in_progress; then
+		if ! pg_dump -Fp $EXTRA_OPTS -h "$HOSTNAME" -U "$USERNAME" "$DATABASE" | gzip > $FINAL_BACKUP_DIR"$DATABASE".sql.gz.in_progress; then
 			echo "[!!ERROR!!] Failed to produce plain backup database $DATABASE" 1>&2
 		else
-			mv $FINAL_BACKUP_DIR"$DATABASE".sql.gz.in_progress $FINAL_BACKUP_DIR"$DATABASE".sql.gz
+		    if [ $ENABLE_TIMESTAMP_OPT = "yes" ]; then
+		        BACKUP_TIME=$(date +%F_%H-%M-%S)
+		        mv $FINAL_BACKUP_DIR"$DATABASE".sql.gz.in_progress $FINAL_BACKUP_DIR"${DATABASE}-${BACKUP_TIME}".sql.gz
+		    else
+		        mv $FINAL_BACKUP_DIR"$DATABASE".sql.gz.in_progress $FINAL_BACKUP_DIR"$DATABASE".sql.gz
+		    fi
 		fi
 	fi
  
@@ -130,10 +141,18 @@ do
 		if ! pg_dump -Fc -h "$HOSTNAME" -U "$USERNAME" "$DATABASE" -f $FINAL_BACKUP_DIR"$DATABASE".custom.in_progress; then
 			echo "[!!ERROR!!] Failed to produce custom backup database $DATABASE" 1>&2
 		else
-			mv $FINAL_BACKUP_DIR"$DATABASE".custom.in_progress $FINAL_BACKUP_DIR"$DATABASE".custom
+		    if [ $ENABLE_TIMESTAMP_OPT = "yes" ]; then
+		        BACKUP_TIME=$(date +%F_%H-%M-%S)
+		        mv $FINAL_BACKUP_DIR"$DATABASE".custom.in_progress $FINAL_BACKUP_DIR"${DATABASE}-${BACKUP_TIME}".custom
+		    else
+		        mv $FINAL_BACKUP_DIR"$DATABASE".custom.in_progress $FINAL_BACKUP_DIR"$DATABASE".custom
+		    fi
+
 		fi
 	fi
  
 done
- 
+
+ls -lah $FINAL_BACKUP_DIR
 echo -e "\nAll database backups complete!"
+

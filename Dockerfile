@@ -1,4 +1,5 @@
-FROM postgres:9.6
+ARG PG_VERSION=latest
+FROM postgres:${PG_VERSION}
 MAINTAINER Jussi Sarkkinen <jussi@sarkkinen.net>
 
 COPY pg_backup /pg_backup
