@@ -1,6 +1,6 @@
 ARG PG_VERSION=latest
 FROM postgres:${PG_VERSION}
-MAINTAINER Jussi Sarkkinen <jussi@sarkkinen.net>
+MAINTAINER Toni Röyhy <toni+docker-pgbackup@montel.fi>
 
 COPY pg_backup /pg_backup
 

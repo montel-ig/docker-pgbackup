@@ -13,8 +13,20 @@ Postgres 9.4, 9.5, 9.6, 10, 11
 To match postgres version of running database use tag format ```pg<vesion>-latest```. For example 
 montel/docker-pgbackup:pg11-latest or montel/docker-pgbackup:pg9.4-latest
 
-### Running ###
 
+## Running ##
+### Environment variables ###
+
+|  Variable            | default | function
+|----------------------|---------|---------
+| ENABLE_CLEAN_OPT     |  "yes"  | adds --clean and --if-exists to pg_dump commnad
+| ENABLE_CUSTOM_BACKUP |  "yes"  | generate .custom format backup
+| ENABLE_TIMESTAMP_OPT |  "no"   | add timestamp of $(date +%F_%H-%M-%S) to file 
+| PGHOST               |localhost| Optional hostname to adhere to pg_hba policies.
+| ENABLE_PLAIN_BACKUPS | "yes"   | Will produce a gzipped plain-format backup
+ 
+ 
+### Docker ###
 ```console
 $ docker run -d --restart=always --volume /path/to/backups:/backups --name pgbackup -e PGHOST=192.168.1.1 -e PGUSER=postgres -e PGPASSWORD=somesecret montel/docker-pgbackup:pg11-latest
 ```
@@ -22,6 +34,53 @@ $ docker run -d --restart=always --volume /path/to/backups:/backups --name pgbac
 ### Oneshot mode ###
 ```console
 $ docker run -d --restart=always --volume /path/to/backups:/backups --name pgbackup -e PGHOST=192.168.1.1 -e PGUSER=postgres -e PGPASSWORD=somesecret montel/docker-pgbackup:pg11-latest /pg_backup/pg_backup.sh
+```
+
+### Kubernetes ###
+Run as a CronJob once every hour, store backup with timestamp 
+```yaml
+apiVersion: batch/v1beta1
+kind: CronJob
+metadata:
+  name: backup-postgres
+spec:
+  concurrencyPolicy: Allow
+  failedJobsHistoryLimit: 10
+  jobTemplate:
+    metadata:
+      creationTimestamp: null
+    spec:
+      template:
+        spec:
+          containers:
+          - image: montel/docker-pgbackup:pg11-2
+            args:
+            - /pg_backup/pg_backup.sh
+            env:
+            - name: ENABLE_CLEAN_OPT
+              value: "yes"
+            - name: ENABLE_CUSTOM_BACKUP
+              value: "no"
+            - name: ENABLE_TIMESTAMP_OPT
+              value: "yes"
+            - name: PGHOST
+              value: postgres
+            - name: PGPASSWORD
+              value: postgres
+            - name: PGUSER
+              value: postgres
+            imagePullPolicy: Always
+            name: backup-postgres
+            volumeMounts:
+            - mountPath: /backups
+              name: postgre-backup-volume
+          terminationGracePeriodSeconds: 30
+          volumes:
+          - name: postgre-backup-volume
+            persistentVolumeClaim:
+              claimName: postgre-backup-volume
+  schedule: 0 * * * *
+  successfulJobsHistoryLimit: 10
 ```
 
 ### compile new versions ###
