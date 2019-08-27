@@ -17,14 +17,15 @@ montel/docker-pgbackup:pg11-latest or montel/docker-pgbackup:pg9.4-latest
 ## Running ##
 ### Environment variables ###
 
-|  Variable            | default | function
-|----------------------|---------|---------
-| ENABLE_CLEAN_OPT     |  "yes"  | adds --clean and --if-exists to pg_dump commnad
-| ENABLE_CUSTOM_BACKUP |  "yes"  | generate .custom format backup
-| ENABLE_TIMESTAMP_OPT |  "no"   | add timestamp of $(date +%F_%H-%M-%S) to file 
-| PGHOST               |localhost| Optional hostname to adhere to pg_hba policies.
-| ENABLE_PLAIN_BACKUPS | "yes"   | Will produce a gzipped plain-format backup
- 
+|  Variable             | default | function
+|-----------------------|---------|---------
+| ENABLE_CLEAN_OPT      |  "yes"  | adds --clean and --if-exists to pg_dump commnad
+| ENABLE_CUSTOM_BACKUPS |  "yes"  | generate .custom format backup
+| ENABLE_TIMESTAMP_OPT  |  "no"   | add timestamp of $(date +%F_%H-%M-%S) to file 
+| PGHOST                |localhost| Optional hostname to adhere to pg_hba policies.
+| ENABLE_PLAIN_BACKUPS  | "yes"   | Will produce a gzipped plain-format backup
+| ENABLE_REMOVE_BACKUPS  | "no"    | delete *.sql.gz files in backup folder witch are older than wanted days
+| CLEAN_BACKUPS_OLDER_THAN_DAYS | 10 | Timelimit to delete files older than this
  
 ### Docker ###
 ```console
@@ -52,6 +53,17 @@ spec:
     spec:
       template:
         spec:
+          restartPolicy: Never
+          affinity:
+            podAffinity:
+              requiredDuringSchedulingIgnoredDuringExecution:
+              - labelSelector:
+                  matchExpressions:
+                  - key: workload.user.cattle.io/workloadselector
+                    operator: In
+                    values:
+                    - deployment-postgres
+                topologyKey: "kubernetes.io/hostname"
           containers:
           - image: montel/docker-pgbackup:pg11-2
             args:
@@ -59,27 +71,28 @@ spec:
             env:
             - name: ENABLE_CLEAN_OPT
               value: "yes"
-            - name: ENABLE_CUSTOM_BACKUP
+            - name: ENABLE_CUSTOM_BACKUPS
               value: "no"
             - name: ENABLE_TIMESTAMP_OPT
               value: "yes"
             - name: PGHOST
               value: postgres
             - name: PGPASSWORD
-              value: postgres
+              value: mysecretpass
             - name: PGUSER
               value: postgres
             imagePullPolicy: Always
             name: backup-postgres
             volumeMounts:
             - mountPath: /backups
-              name: postgre-backup-volume
+              name: postgre-prod
+              subPath: backups
           terminationGracePeriodSeconds: 30
           volumes:
-          - name: postgre-backup-volume
-            persistentVolumeClaim:
-              claimName: postgre-backup-volume
-  schedule: 0 * * * *
+            - name: postgre-prod
+              persistentVolumeClaim:
+                claimName: postgre-prod
+  schedule: '0 * * * *'
   successfulJobsHistoryLimit: 10
 ```
 
