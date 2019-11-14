@@ -2,7 +2,8 @@
 set -xe
 POSTGRE_VERSIONS=(9.4 9.5 9.6 10 11)
 REPONAME=montel/docker-pgbackup
-VERSION=3
+VERSION=4
+
 
 for pg in ${POSTGRE_VERSIONS[@]}; do
     #TAG="pg${pg/\./_}"
