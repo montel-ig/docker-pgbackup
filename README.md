@@ -25,7 +25,7 @@ montel/docker-pgbackup:pg11-latest or montel/docker-pgbackup:pg9.4-latest
 | PGHOST                |localhost| Optional hostname to adhere to pg_hba policies.
 | ENABLE_PLAIN_BACKUPS  | "yes"   | Will produce a gzipped plain-format backup
 | ENABLE_REMOVE_BACKUPS  | "no"    | delete *.sql.gz files in backup folder witch are older than wanted days
-| CLEAN_BACKUPS_OLDER_THAN_DAYS | 10 | Timelimit to delete files older than this
+| CLEAN_BACKUPS_OLDER_THAN_DAYS | 10 | Timelimit to delete files older than this. Only works if ENABLE_REMOVE_BACKUPS is set to "yes".
  
 ### Docker ###
 ```console

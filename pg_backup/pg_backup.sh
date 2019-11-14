@@ -158,6 +158,6 @@ echo -e "\nAll database backups complete!"
 
 if [ "$ENABLE_REMOVE_BACKUPS" = "yes" ]; then
   echo -e "Deleting old backups"
-  find ${BACKUP_DIR}/*/*.sql.gz -mtime +${CLEAN_BACKUPS_OLDER_THAN_DAYS} -exec rm {} \;
-  find ${BACKUP_DIR}/*/*.custom -mtime +${CLEAN_BACKUPS_OLDER_THAN_DAYS} -exec rm {} \;
+  find ${BACKUP_DIR}/*/*.sql.gz -mtime +${CLEAN_BACKUPS_OLDER_THAN_DAYS} -exec rm {} \; || true
+  find ${BACKUP_DIR}/*/*.custom -mtime +${CLEAN_BACKUPS_OLDER_THAN_DAYS} -exec rm {} \; || true
 fi
