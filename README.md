@@ -11,19 +11,6 @@ This tool also supports rotated backups through the
 backups based on the configuration. Backups will be stored with
 suffixes -monthly, -weekly or -daily.
 
-```
-# Which day to take the weekly backup from
-(1-7 = Monday-Sunday).
-DAY_OF_WEEK_TO_KEEP=5
- 
-# Number of days to keep daily backups
-DAYS_TO_KEEP=7
- 
-# How many weeks to keep weekly backups
-WEEKS_TO_KEEP=5
-```
-#
-
 ## Supported Postgresql versions
 ### Build provides support for: Postgres 9.4, 9.5, 9.6, 10, 11
 
@@ -136,8 +123,6 @@ spec:
   concurrencyPolicy: Allow
   failedJobsHistoryLimit: 1
   jobTemplate:
-    metadata:
-      creationTimestamp: null
     spec:
       template:
         metadata:
@@ -153,11 +138,11 @@ spec:
             - name: ENABLE_TIMESTAMP_OPT
               value: "yes"
             - name: DAY_OF_WEEK_TO_KEEP
-              value: 1
+              value: "1"
             - name: DAYS_TO_KEEP
-              value: 7
+              value: "7"
             - name: WEEKS_TO_KEEP
-              value: 5
+              value: "5"
             - name: PGHOST
               value: postgres
             - name: PGPASSWORD
