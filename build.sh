@@ -2,7 +2,7 @@
 set -xe
 POSTGRE_VERSIONS=(9.4 9.5 9.6 10 11)
 REPONAME=montel/docker-pgbackup
-VERSION=4
+VERSION=5
 
 
 for pg in ${POSTGRE_VERSIONS[@]}; do

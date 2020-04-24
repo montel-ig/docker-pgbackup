@@ -123,7 +123,12 @@ function perform_backups()
 			if ! pg_dump -Fp -h "$HOSTNAME" -U "$USERNAME" "$DATABASE" | gzip > $FINAL_BACKUP_DIR"$DATABASE".sql.gz.in_progress; then
 				echo "[!!ERROR!!] Failed to produce plain backup database $DATABASE" 1>&2
 			else
+			    if [ $ENABLE_TIMESTAMP_OPT = "yes" ]; then
+				BACKUP_TIME=$(date +%F_%H-%M-%S)
+				mv $FINAL_BACKUP_DIR"$DATABASE".sql.gz.in_progress $FINAL_BACKUP_DIR"${DATABASE}-${BACKUP_TIME}".sql.gz
+			    else
 				mv $FINAL_BACKUP_DIR"$DATABASE".sql.gz.in_progress $FINAL_BACKUP_DIR"$DATABASE".sql.gz
+			    fi
 			fi
 		fi
  
@@ -134,12 +139,18 @@ function perform_backups()
 			if ! pg_dump -Fc -h "$HOSTNAME" -U "$USERNAME" "$DATABASE" -f $FINAL_BACKUP_DIR"$DATABASE".custom.in_progress; then
 				echo "[!!ERROR!!] Failed to produce custom backup database $DATABASE"
 			else
+			    if [ $ENABLE_TIMESTAMP_OPT = "yes" ]; then
+				BACKUP_TIME=$(date +%F_%H-%M-%S)
+				mv $FINAL_BACKUP_DIR"$DATABASE".custom.in_progress $FINAL_BACKUP_DIR"${DATABASE}-${BACKUP_TIME}".custom
+			    else
 				mv $FINAL_BACKUP_DIR"$DATABASE".custom.in_progress $FINAL_BACKUP_DIR"$DATABASE".custom
+			    fi
 			fi
 		fi
  
 	done
- 
+
+	ls -lah $FINAL_BACKUP_DIR
 	echo -e "\nAll database backups complete!"
 }
  
@@ -173,8 +184,14 @@ then
 fi
  
 # DAILY BACKUPS
+echo "Starting Backups Rotation script ..."
  
 # Delete daily backups 7 days old or more
+echo -e "\nDeleting daily backups $DAYS_TO_KEEP days old"
 find $BACKUP_DIR -maxdepth 1 -mtime +$DAYS_TO_KEEP -name "*-daily" -exec rm -rf '{}' ';'
- 
+
+# Delete backups created with the pg_backup.sh script 7 days old or more
+echo -e "\nDeleting backups created with the pg_backup.sh scrip $DAYS_TO_KEEP days old"
+find $BACKUP_DIR -maxdepth 1 -mtime +$DAYS_TO_KEEP ! -name "*-daily" ! -name "*-weekly" ! -name "*-monthly" -exec rm -rf '{}' ';'
+
 perform_backups "-daily"
